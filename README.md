@@ -23,7 +23,7 @@ This is a repository for creating the MIPI driver on NVIDIA Orin
       - [Mainline Linux]  (https://github.com/torvalds/linux/blob/master/drivers/media/i2c/imx290.c)
       - [Jetson Camera Bring-Up Wiki] ( https://docs.nvidia.com/jetson/archives/r35.4.1/DeveloperGuide/text/SD/CameraDevelopment.html)
 
-  # Design and arhitecture 
+  # 2. Design and arhitecture 
       # Logical flow
     -----------------   ----------------------    -----------------------      ----------------------------------     ---------------    -------------------------  
      IMX219 (Camera) -> MIPI CSI (on Orin SOC) -> Video Input (VI) (Tegra ) -> V4L2 Subdivice (my_imx219.c driver) -> media controler -> user space (v4l2-ctl GStreamer)
@@ -41,7 +41,7 @@ This is a repository for creating the MIPI driver on NVIDIA Orin
    4. Boot kernel and inspect logs
    5. Validate user-space visibility
 
-# Practical implementation see (my_imx219.c)
+# 3. Practical implementation see (my_imx219.c)
    -> a small implementation 
    ```
    /*
@@ -107,5 +107,88 @@ static int imx219_probe(struct i2c_client *client)
    ```
 
 # Device Tree Example
+```
+&i2c0 {
+    imx219_a@10 {
+        compatible = "sony,imx219";
+        reg = <0x10>;
+        clocks = <&bpmp TEGRA234_CLK_CAM0>;
+        clock-names = "xclk";
+        reset-gpios = <&gpio CAM0_RST GPIO_ACTIVE_LOW>;
 
-      
+        port {
+            imx219_out0: endpoint {
+                remote-endpoint = <&csi_in0>;
+                bus-width = <2>;
+                data-lanes = <1 2>;
+                clock-noncontinuous;
+                link-frequencies = /bits/ 64 <456000000>;
+            };
+        };
+    };
+};
+
+&vi {
+    ports {
+        port@0 {
+            csi_in0: endpoint {
+                remote-endpoint = <&imx219_out0>;
+                bus-width = <2>;
+                data-lanes = <1 2>;
+            };
+        };
+    };
+};
+```
+
+# Kernel integration
+   -> Add driver to drivers/media/i2c/Makefile and Kconfig 
+   -> Build kernel and device tree
+   -> test it on Orin (Not possible for me :()
+
+# 4. Test and debug
+   -> I used a Linux jetson-dev 5.15.0-141-generic #151-Ubuntu SMP Sun May 18 21:35:19 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux
+   -> i2cdetect -y 0
+   -> dmesg | grep imx219
+   -> v4l2-ctl --list-devices
+   -> v4l2-ctl --device /dev/video0 --stream-mmap --stream-count=1 --stream-to=frame.raw
+
+# Logs to watch 
+      -> dmesg
+      -> /dev/video* creation
+      -> I2C register reads and chip ID detection
+
+# MIPI Signal Check 
+      -> Use oscilloscope or logic analyzer on D0, D1, CLK (I hope I will have the opportunity)
+
+ # 5. Integration with GStreamer / DeepStream
+     # GStreamer Pipeline
+      -> gst-launch-1.0 v4l2src device=/dev/video0 ! 'video/x-raw,width=1280,height=720,framerate=30/1' ! autovideosink
+
+      # DeepStream Configuration (deepstream_app_config.txt)
+   ```
+   [source0]
+   enable=1
+   type=1
+   camera-width=1280
+   camera-height=720
+   camera-fps-n=30
+   camera-fps-d=1
+   device=/dev/video0
+```
+      # Troubleshooting
+      -> Check gst-inspect-1.0 v4l2src
+      -> Review /var/log/syslog or journalctl
+
+# 6. Test Plan and Troubleshooting
+   1. make the driver
+   2. i2c detection i2cdetect -y 0
+   3. dmesg | grep my_imx219
+   4. v4l2 listing v4l2-ctl --list-devices
+   5. capture the test frame v4l2-ctl --stream-to=frame.raw
+   6. Pipeline with GStreamer gst-launch-1.0
+
+ # Commun issues 
+    1. No /dev/video0: Check DT bindings, sensor not probed
+    2. No image : check the resolution or format 
+    
