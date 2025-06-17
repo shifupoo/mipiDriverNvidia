@@ -142,17 +142,20 @@ static int imx219_probe(struct i2c_client *client)
 ```
 
 # Kernel integration
+```
    -> Add driver to drivers/media/i2c/Makefile and Kconfig 
    -> Build kernel and device tree
    -> test it on Orin (Not possible for me :()
+```
 
 # 4. Test and debug
-   -> I used a Linux jetson-dev 5.15.0-141-generic #151-Ubuntu SMP Sun May 18 21:35:19 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux
+```
+   -> I used a Linux jetson-dev 5.15.0-141-generic x86_64
    -> i2cdetect -y 0
    -> dmesg | grep imx219
    -> v4l2-ctl --list-devices
    -> v4l2-ctl --device /dev/video0 --stream-mmap --stream-count=1 --stream-to=frame.raw
-
+```
 # Logs to watch 
       -> dmesg
       -> /dev/video* creation
@@ -181,7 +184,7 @@ static int imx219_probe(struct i2c_client *client)
       -> Review /var/log/syslog or journalctl
 
 # 6. Test Plan and Troubleshooting
-   1. make the driver
+   1. compile the driver
    2. i2c detection i2cdetect -y 0
    3. dmesg | grep my_imx219
    4. v4l2 listing v4l2-ctl --list-devices
