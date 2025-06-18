@@ -1,5 +1,5 @@
 # mipiDriverNvidia
-This is a repository for creating the MIPI driver on NVIDIA Orin
+This repository documents the design, implementation, and testing of a MIPI-CSI2 camera driver on NVIDIA Orin, as part of a practical assignment.
 
 # 1. Documentation and analize
    # Necessar information :
@@ -22,6 +22,7 @@ This is a repository for creating the MIPI driver on NVIDIA Orin
       - [Linux Kernel Docs V4L2 ] ( https://www.kernel.org/doc/html/v4.8/media/kapi/v4l2-core.html)
       - [Mainline Linux]  (https://github.com/torvalds/linux/blob/master/drivers/media/i2c/imx290.c)
       - [Jetson Camera Bring-Up Wiki] ( https://docs.nvidia.com/jetson/archives/r35.4.1/DeveloperGuide/text/SD/CameraDevelopment.html)
+      - [v4l2-compliance] (https://manpages.ubuntu.com/manpages/focal/man1/v4l2-compliance.1.html)
 
   # 2. Design and arhitecture 
       # Logical flow
@@ -150,7 +151,7 @@ static int imx219_probe(struct i2c_client *client)
 
 # 4. Test and debug
 ```
-   -> I used a Linux jetson-dev 5.15.0-141-generic x86_64
+   -> I used a VM with Linux jetson-dev 5.15.0-141-generic x86_64 only for teoritic pourpuse
    -> i2cdetect -y 0
    -> dmesg | grep imx219
    -> v4l2-ctl --list-devices
@@ -194,4 +195,8 @@ static int imx219_probe(struct i2c_client *client)
  # Commun issues 
     1. No /dev/video0: Check DT bindings, sensor not probed
     2. No image : check the resolution or format 
+
+# TO DO :
+   1. Simulate NVIDIA Orin Environment (QEMU + Linux Tegra)
+   2. Test Driver on Real NVIDIA Orin Hardware
     
