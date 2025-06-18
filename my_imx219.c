@@ -182,9 +182,7 @@ static struct i2c_driver imx219_i2c_driver = {
 */
 module_i2c_driver(imx219_i2c_driver);
 
-
 MODULE_AUTHOR("Muraru Mihaela");
 MODULE_LICENSE("GPL");
-MODULE_DESCRIPTION("This is a MIPI driver for IMX219PQH5-C");
-
+MODULE_DESCRIPTION("Sony IMX219 V4L2 sensor driver");
 
