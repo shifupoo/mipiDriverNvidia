@@ -27,7 +27,7 @@ static int imx219_s_stream(struct v4l2_subdev *sd, int enable)
 
     dev_info(&client->dev, "s_stream: %s\n", enable ? "START" : "STOP");
 
-    // Start/Stop streaming
+    //TO DO: Start/Stop streaming
 
     return 0;
 }
